@@ -4,6 +4,9 @@ import numpy as np
 
 def calculate_per_residue_rmsd(fixed_structure, moving_structure, overhang_size):
     # Perform the superimposition and obtain the transformed structure and RMSD
+    print(overhang_size)
+    print(fixed_structure)
+    print(moving_structure)
     transformed_structure, overall_rmsd = superimpose_overhangs(fixed_structure, moving_structure, overhang_size)
     
     # Initialize a list to store per-residue RMSD for each chain
@@ -46,7 +49,7 @@ def calculate_per_residue_rmsd(fixed_structure, moving_structure, overhang_size)
                 per_chain_rmsd.append(per_residue_rmsd_chain)
 
     # Calculate the average per-residue RMSD
-    per_residue_rmsd = np.mean(per_chain_rmsd, axis=0)    
+    per_residue_rmsd = np.mean(per_chain_rmsd, axis=0)
 
     return transformed_structure, per_residue_rmsd, overall_rmsd, per_chain_rmsd
     
@@ -58,26 +61,29 @@ def superimpose_overhangs(fixed_structure, moving_structure, overhang_size):
     for model in fixed_structure:
         for chain in model:
             residues = list(chain.get_residues())
+            #print(residues.get_atoms())
             selected_residues_last = residues[-overhang_size:]
             selected_residues_first = residues[:overhang_size]
             for residue in selected_residues_last:
                 last_fixed.extend(residue.get_atoms())
             for residue in selected_residues_first:
                 first_fixed.extend(residue.get_atoms())
-                
+
+                    
     first_moving = []  # saves the N terminal residues of the moving structure
     last_moving = []  # saves the C terminal residues of the moving structure
     
     for model in moving_structure:
         for chain in model:
             residues = list(chain.get_residues())
+            #print(residues.get_atoms())
             selected_residues_last = residues[-overhang_size:]
             selected_residues_first = residues[:overhang_size]
             for residue in selected_residues_first:
                 first_moving.extend(residue.get_atoms())
             for residue in selected_residues_last:
-                last_moving.extend(residue.get_atoms()) 
-    
+                last_moving.extend(residue.get_atoms())
+
     # Calculate the centroids of the overhang atoms
     centroid_fixed = sum(atom.get_coord() for atom in last_fixed) / len(last_fixed)
     centroid_moving = sum(atom.get_coord() for atom in first_moving) / len(first_moving)
@@ -95,6 +101,10 @@ def superimpose_overhangs(fixed_structure, moving_structure, overhang_size):
     vector_fixed = np.array([atom.get_coord() for atom in last_fixed])
     vector_moving = np.array([atom.get_coord() for atom in first_moving])
 
+
+    print(f"Fixed vector size: {vector_fixed.shape}")
+    print(f"Moving vector size: {vector_moving.shape}")
+
     # Initialize the Superimposer with the selected atoms
     superimposer = SVDSuperimposer()
     superimposer.set(vector_fixed, vector_moving)
@@ -105,10 +115,9 @@ def superimpose_overhangs(fixed_structure, moving_structure, overhang_size):
         if centroid_fixed[0] * centroid_fixed[1] * centroid_fixed[2] * centroid_moving_last[0] * centroid_moving_last[1] * centroid_moving_last[2] < 0:
             atom.set_coord(-1 * np.dot(atom.get_coord(), rot) + tran)
         else:
-            atom.set_coord(np.dot(atom.get_coord(), rot) + tran)   
+            atom.set_coord(np.dot(atom.get_coord(), rot) + tran)
     
     return moving_structure, superimposer.rms
-
 
 if __name__ == "__main__":
     # Example usage
@@ -120,3 +129,4 @@ if __name__ == "__main__":
     transformed_structure, per_residue_rmsd, overall_rmsd, per_chain_rmsd = calculate_per_residue_rmsd(fixed_structure, moving_structure, overhang_size)
     print("Overall RMSD:", overall_rmsd)
     print("Per-residue RMSD:", per_residue_rmsd)
+

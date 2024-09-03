@@ -8,8 +8,8 @@ import openmm.app as omm_app
 import openmm as omm
 import openmm.unit as unt
 from openmm.app.forcefield import PME, HBonds
-#import pdbfixer
-#import io
+import pdbfixer
+import io
 
 def relax_amber14_score(pdb_path, relaxed_pdb_path, minimize_energy=True,local_min=False, iter=0, tol=0.1,pltfm='CUDA'):
 

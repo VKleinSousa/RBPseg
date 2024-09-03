@@ -21,7 +21,7 @@ def prepare_files(input_path, output_path):
                         rank_number = pdb_file.split("_")[1].split(".")[0]
                         
                         # Prepare the new file name
-                        new_file_name = f"{pdb_name}_seq_{seq_n}_{rank_number}.pdb"
+                        new_file_name = f"{seq_n}_{pdb_name}_{rank_number}.pdb"
                         
                         # Copy the file to the output directory with the new name
                         source_file = os.path.join(folder_path, pdb_file)
