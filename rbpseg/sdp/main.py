@@ -9,7 +9,7 @@ from .results_processing import save_results, visualize_results
 
 logger = logging.getLogger(__name__)
 
-def main(pdb_file,experimental_structure, pair_distance_constant, min_k, max_k, clustering_method, min_cluster_size, symmetry, save_overlap_domains, save_pdb_domains, random_cut, optimize_umap, only_one_chain, normalize_plddt):
+def main(pdb_file,experimental_structure=False, pair_distance_constant=1, min_k=3, max_k=6, clustering_method='spectral', min_cluster_size=120, symmetry=3, save_overlap_domains=False, save_pdb_domains=True, random_cut=False, optimize_umap=False, only_one_chain=False, normalize_plddt=True):
     logger.info("Starting main process")
     try:
         structure = load_structure(pdb_file, True)
