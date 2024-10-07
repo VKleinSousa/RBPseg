@@ -9,7 +9,7 @@ import logging
 import sys  # Import sys for exiting with error codes
 import pandas as pd
 from sklearn.cluster import SpectralClustering
-from TFold.strclust import *
+from rbpseg.strclust import *
 from scipy.ndimage import uniform_filter1d
 logger = logging.getLogger(__name__)
 
