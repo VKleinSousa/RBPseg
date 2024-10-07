@@ -51,8 +51,8 @@ def main():
     parser.add_argument('-of', '--overhang_file', type=str, help='Overhangs file')
     parser.add_argument('-f', '--function', type=int, default=0, help='Superimpose function: 0 to global, 1 to local (default: 1)')
     parser.add_argument('-n', '--save_name', type=str, default='merged.pdb', help='Name of the final file (default: merged.pdb)')
-    parser.add_argument('-r', '--relax', type=bool, default=True, help='Whether it will run amber relaxation')
-    parser.add_argument('-b', '--bfactor', type=bool, default=False, help='Whether it will change the bfactor to zero in segment points')
+    parser.add_argument('-r', '--relax',  action='store_true', help='Add -r to run amber relaxation. ')
+    parser.add_argument('-b', '--bfactor', action='store_true', help='Add -b to change the bfactor to zero in segment points')
 
     # Parse the command-line arguments
     args = parser.parse_args()
@@ -84,7 +84,7 @@ def main():
 
     # Optionally apply amber relaxation
     if args.relax == True:
-        name_relax = name + '_relax.pdb'
+        name_relax = os.path.join(directory_path, name + '_relax.pdb')
         relax_model(name, name_relax, 0)
         parser = PDBParser(QUIET=True)
         # Parse the current PDB file
