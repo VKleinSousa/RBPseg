@@ -84,7 +84,7 @@ def main():
 
     # Optionally apply amber relaxation
     if args.relax == True:
-        name_relax = name + '_relax.pdb'
+        name_relax = os.path.join(directory_path, name + '_relax.pdb')
         relax_model(name, name_relax, 0)
         parser = PDBParser(QUIET=True)
         # Parse the current PDB file
