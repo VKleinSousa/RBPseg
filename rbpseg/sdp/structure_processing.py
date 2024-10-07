@@ -8,12 +8,24 @@ def load_structure(pdb_file, only_one_chain):
     logger.info(f"Loading structure from {pdb_file}")
     parser = PDBParser(QUIET=True)
     structure = parser.get_structure('structure', pdb_file)
-    if only_one_chain:
-        chain_id = 'A'  # Modify as needed
-        structure = extract_chain(structure, chain_id)
-    return structure
 
-def preprocess_structure(structure, normalize_plddt):
+    if only_one_chain:
+        # Extract chains and sort them alphabetically by their chain IDs
+        chains = sorted(structure[0].get_chains(), key=lambda chain: chain.id)
+        
+        # Select the first chain in alphabetical order
+        chain_id = chains[0].id if chains else None
+        
+        if chain_id:
+            structure = extract_chain(structure, chain_id)
+        else:
+            logger.error("No chains found in the structure.")
+            return None
+
+    return structure
+def preprocess_structure(structure, experimental_structure, normalize_plddt):
+    if experimental_structure:
+        structure = make_bfactor(structure)
     if normalize_plddt:
         structure = normalize_bfactor(structure)
     return structure
@@ -32,7 +44,17 @@ def normalize_bfactor(structure):
     except Exception as e:
         logger.error(f"Error normalizing B-factors: {e}", exc_info=True)
         raise
-
+        
+def make_bfactor(structure):
+    try:
+        for atom in structure.get_atoms():
+            atom.set_bfactor(100)
+        logger.info("B-factors set")
+        return structure
+    except Exception as e:
+        logger.error(f"Error setting B-factors to experimental structure: {e}", exc_info=True)
+        raise
+        
 def extract_chain(structure, chain_id):
     from Bio import PDB
     try:
