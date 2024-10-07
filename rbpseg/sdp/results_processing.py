@@ -18,7 +18,7 @@ def three_to_one(aa):
     }
     return aa_mapping.get(aa, aa)
 
-def split_cluster(cluster_residues, max_residue_jump=10):
+def split_cluster(cluster_residues, max_residue_jump=50):
     new_cluster_residues = []
     current_subcluster = []
     for cluster in cluster_residues:
@@ -29,7 +29,7 @@ def split_cluster(cluster_residues, max_residue_jump=10):
                 break
             next_residue_id = cluster[i + 1].id[1]
 
-            if next_residue_id - current_residue_id > 1:
+            if next_residue_id - current_residue_id > max_residue_jump:
                 current_subcluster.append(cluster[i])
                 if current_subcluster:
                     new_cluster_residues.append(current_subcluster)
@@ -40,6 +40,7 @@ def split_cluster(cluster_residues, max_residue_jump=10):
         new_cluster_residues.append(current_subcluster)
         current_subcluster = []
     return new_cluster_residues
+
 
 def save_structure(structure, filename, selector=None):
     try:
@@ -59,7 +60,7 @@ def save_results(structure, clusters, residues, save_overlap_domains, save_pdb_d
     for i, cluster in enumerate(clusters):
         cluster_residues[cluster].append(residues[i])
 
-    cluster_residues = split_cluster(cluster_residues, max_residue_jump=1)
+    cluster_residues = split_cluster(cluster_residues)
     sorted_cluster_indices = np.argsort([np.mean([residue.id[1] for residue in cluster]) for cluster in cluster_residues])
 
     if save_overlap_domains:
@@ -102,15 +103,40 @@ def save_overlap_domains_to_fasta(cluster_residues, sorted_cluster_indices, pdb_
             writer.writerow({'Pair': pair_name, 'Overlap Length': overlap_length})
 
 def save_pdb_clusters(structure, cluster_residues, pdb_file):
+    # Get all chains in the structure
+    chains = [chain for chain in structure.get_chains()]
+    
+    if len(chains) < 3:
+        print("Warning: Expected three chains in the structure.")
+        return
+    
+    first_chain = chains[0]
+    second_chain = chains[1]
+    third_chain = chains[2]
+    
+    # Get the number of residues in the first chain
+    num_residues_in_chain = len(first_chain)
+
     for cluster_idx, cluster_residue_list in enumerate(cluster_residues):
         cluster_structure = structure.copy()
 
+        # Extend the cluster_residue_list to include corresponding residue numbers from the second and third chains
+        extended_cluster_residues = [residue.id[1] for residue in cluster_residue_list]  # Extract the residue numbers
+
+        # Add residues from the second and third chains
+        for residue_number in extended_cluster_residues.copy():
+            extended_cluster_residues.append(residue_number + num_residues_in_chain)  # Second chain
+            extended_cluster_residues.append(residue_number + 2 * num_residues_in_chain)  # Third chain
+
         class ResidueSelector(Select):
             def accept_residue(self, residue):
-                return residue in cluster_residue_list
+                # Check if the residue's number is part of the extended cluster residues
+                return residue.id[1] in extended_cluster_residues
 
+        # Save the structure for this cluster
         filename = f'{pdb_file.split(".")[0]}_domain_{cluster_idx + 1}.pdb'
         save_structure(cluster_structure, filename, ResidueSelector())
+
 
 def visualize_results(sdp_matrix, umap_result, clusters, pdb_file):
     plt.figure(figsize=(12, 5))
