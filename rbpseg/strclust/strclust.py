@@ -222,7 +222,7 @@ def calculate_sm(identity_matrix, max_clusters, min_clusters=3, n_rounds=3):
     return results_df
 
 def exponential_decay(x, a, b, c):
-    return a * np.exp(-b * x)  + c 
+    return a * np.exp(-b * x)  + c
 
 def exponential_decay_derivative(x, a, b, c):
     return -a * b * np.exp(-b * x)
@@ -369,6 +369,41 @@ def relabel_bad_clusters(df_classes,filtered_classes):
     df_classes['filtered_classes'] = relabel_cluster_vector
     return(df_classes)
 
+def save_plots(sm_df,a,b,c,output_file):
+    import matplotlib.pyplot as plt
+    import numpy as np
+    
+    # Create a figure and two axes side by side
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 4))  # Adjust the figsize as needed
+    x = np.arange(2, len(sm_df) + 2)
+    # First plot (scatter and exponential decay curve)
+    ax1.scatter(x, sm_df['SM'], color='blue', s=12, label = 'SM')
+    ax1.set_xlabel('#clusters')
+    ax1.plot(x, exponential_decay(sm_df['cluster_number'], a, b, c), label='pSM', color='red')
+    ax1.legend()
+    ax1.grid(True)
+    
+    # Second plot (second derivative)
+    dx = x[1] - x[0]
+    derivative = np.gradient(sm_df['SM'], dx)
+    derivative_2 = np.gradient(derivative, dx)
+    y_derivative_2 = exponential_decay_double_derivative(sm_df['cluster_number'], a, b, c)
+    
+    ax2.plot(x, y_derivative_2, label='second derivative pSM', color='red')
+    ax2.scatter(x, derivative_2, label='second derivative SM', color='blue', s=12)
+    ax2.set_xlabel('#clusters')
+    ax2.set_ylabel('Second Derivative of Metric')
+    ax2.legend()
+    ax2.grid(True)
+    
+    # Adjust layout and display the plot
+    plt.tight_layout()
+    
+    plt.savefig(f'{output_file}.png', dpi=300, transparent=True)  # Save the figure if needed
+    print(f' SM plots save to {output_file}.png')
+    #plt.show()
+
+
 def main():
     # Create an ArgumentParser object to handle command-line arguments
     parser = argparse.ArgumentParser(description='Perform spectral clustering on TM score matrix.')
@@ -381,6 +416,7 @@ def main():
     parser.add_argument('-tm', '--tm_threshold', type=float, default=None, help='Threshold for the mean TM score in order to define a class. If not provided, it will be estimated automatically ~0.25.')
     parser.add_argument('-o', '--output', type=str, default='output', help='Output file path (default: output)')
     parser.add_argument('-d', '--dissimilarity', action='store_true', help='If clustering based on dissimilarity')
+    parser.add_argument('-p', '--save_sm_plots', action='store_true', help='Save the SM and pSM plots')
     
     # Parse the command-line arguments
     args = parser.parse_args()
@@ -393,7 +429,7 @@ def main():
     output = args.output
     dissimilarity = args.dissimilarity
     tm_threshold = args.tm_threshold
-
+    save_sm_plots = args.save_sm_plots
     print(f"Reading TM score file: {TM_path}")
     mat = pd.read_csv(TM_path, sep="\t")
 
@@ -407,6 +443,8 @@ def main():
     sm_df = calculate_sm(identity_matrix, max_classes)
    
     a, b, c = fit_psm(sm_df)
+    if save_sm_plots:
+        save_plots(sm_df,a,b,c,output)
     # Estimate epsilon if not provided
     if epsilon is None:
         epsilon = calculate_optimal_epsilon(max_classes, a, b, c)
