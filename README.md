@@ -56,8 +56,8 @@ rbpseg-sdp -p <pdb_file> -s <min_domain_size> -pd <pair_distance_constant>
 ```
 
 
-### Examples
-## Example 1: Creating fraction fastas using an ESMfold model
+## Examples
+#### Example 1: Creating fraction fastas using an ESMfold model
 
 To run the segmentation on a PDB file:
 
@@ -69,7 +69,7 @@ outputs: FASTA files; overlaps file; sDp plot:
 ![sdpExample1](./Examples/Example1-sDp/rbp_11_combined_plots.png)
 
 
-## Example 2: Merging fractions
+#### Example 2: Merging fractions
 
 To run the merge process:
 
@@ -80,7 +80,7 @@ outputs: merged file (rbp_11.pdb).
 
 Add ```-r ``` to run relaxation. The relaxation step needs CUDA to run. You can skip relaxation by adding the flag ``` -r False ```
 
-## Example 3: Finding pseudo-domains
+#### Example 3: Finding pseudo-domains
 
 ```bash
 rbpseg-sdp -p Examples/Example3-PseudoDomain/rbp_11.pdb -k 20 -sv
