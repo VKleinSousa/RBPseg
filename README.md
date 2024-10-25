@@ -15,7 +15,7 @@ To get started with `RBPseg`, follow the steps below.
 
 Clone this repository to your local machine:
 ```bash
-git clone https://github.com/yourusername/rbpseg.git
+git clone https://github.com/VKleinSousa/rbpseg.git
 cd rbpseg
 ```
 
