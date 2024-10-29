@@ -88,3 +88,30 @@ rbpseg-sdp -p Examples/Example3-PseudoDomain/rbp_11.pdb -k 20 -sv
 
 ![sdpspectral](./Examples/Example3-PseudoDomain/rbp_11_combined_plots_spectral.png)
 
+
+## Reference ##
+
+If you applied any of these codes in your work, please consider citing:
+
+***Towards a complete phage tail fiber structure atlas.
+Victor Klein-Sousa, Aritz Roa-Eguiara, Claudia Sybille Kielkopf, Nicholas Sofos, Nicholas M. I. Taylor
+bioRxiv 2024.10.28.620165; doi: https://doi.org/10.1101/2024.10.28.620165***
+
+```
+@article {Klein-Sousa2024.10.28.620165,
+	author = {Klein-Sousa, Victor and Roa-Eguiara, Aritz and Kielkopf, Claudia Sybille and Sofos, Nicholas and Taylor, Nicholas M. I.},
+	title = {Towards a complete phage tail fiber structure atlas.},
+	elocation-id = {2024.10.28.620165},
+	year = {2024},
+	doi = {10.1101/2024.10.28.620165},
+	publisher = {Cold Spring Harbor Laboratory},
+	abstract = {Bacteriophages use receptor-binding proteins (RBPs) to adhere to bacterial hosts. Understanding the structure of these RBPs can provide insights into their target interactions. Tail fibers, a prominent type of RBP, are typically elongated, flexible, and trimeric proteins, making it challenging to obtain high-resolution experimental data of their full-length structures. Recent advancements in deep learning-based protein structure prediction, such as AlphaFold2-multimer (AF2M) and ESMfold, allow for the generation of high-confidence predicted models of complete tail fibers. In this paper, we introduce RBPseg, a method that combines monomeric ESMfold predictions with a novel sigmoid distance pair (sDp) protein segmentation technique. This method segments the tail fiber sequences into smaller fractions, preserving domain boundaries. These segments are then predicted in parallel using AF2M and assembled into a full fiber model. We demonstrate that RBPseg significantly improves AF2M v2.3.2 in terms of model confidence, running time, and memory usage. To validate our approach, we used single-particle cryo-electron microscopy to analyze five tail fibers from three phages of the BASEL collection. Additionally, we conducted a structural classification of 67 fibers and their domains, which identified 16 well-defined tail fiber classes and 89 domains. Our findings suggest the existence of modular fibers as well as fibers with different sequences and shared structure, indicating possible sequence convergence, divergence, and domain swapping. We further demonstrate that these structural classes account for at least 24\% of the known tail fiber universe.Competing Interest StatementThe authors have declared no competing interest.},
+	URL = {https://www.biorxiv.org/content/early/2024/10/28/2024.10.28.620165},
+	eprint = {https://www.biorxiv.org/content/early/2024/10/28/2024.10.28.620165.full.pdf},
+	journal = {bioRxiv}
+}
+
+```
+
+
+
