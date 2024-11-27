@@ -6,6 +6,7 @@ import csv
 import matplotlib.pyplot as plt
 import logging
 import numpy as np
+import pandas as pd
 
 logger = logging.getLogger(__name__)
 
@@ -55,7 +56,7 @@ def save_structure(structure, filename, selector=None):
         logger.error(f"Error saving structure to {filename}: {e}", exc_info=True)
         raise
 
-def save_results(structure, clusters, residues, save_overlap_domains, save_pdb_domains, pdb_file, symmetry, min_cluster_size):
+def save_results(structure, clusters, residues, save_overlap_domains, save_pdb_domains, pdb_file, symmetry, min_cluster_size, min_ov_size):
     cluster_residues = [[] for _ in range(len(np.unique(clusters)))]
     for i, cluster in enumerate(clusters):
         cluster_residues[cluster].append(residues[i])
@@ -64,15 +65,13 @@ def save_results(structure, clusters, residues, save_overlap_domains, save_pdb_d
     sorted_cluster_indices = np.argsort([np.mean([residue.id[1] for residue in cluster]) for cluster in cluster_residues])
 
     if save_overlap_domains:
-        save_overlap_domains_to_fasta(cluster_residues, sorted_cluster_indices, pdb_file, symmetry, min_cluster_size)
+        save_overlap_domains_to_fasta(cluster_residues, sorted_cluster_indices, pdb_file, symmetry, min_cluster_size,min_cluster_size)
 
     if save_pdb_domains:
         save_pdb_clusters(structure, cluster_residues, pdb_file)
 
-def save_overlap_domains_to_fasta(cluster_residues, sorted_cluster_indices, pdb_file, symmetry, min_cluster_size):
-    overlap_lengths = []
-    k = 0
-    concatenated_sequence = ''
+def save_overlap_domains_to_fasta(cluster_residues, sorted_cluster_indices, pdb_file, symmetry, min_cluster_size,min_ov_size):
+    overlap_lengths, pairs, k, concatenated_sequence, domains_combined, overlap_length = [], [], 0, '', '', 0
     for i in range(len(sorted_cluster_indices) - 1):
         seq_records = []
         current_cluster_residue_list = cluster_residues[sorted_cluster_indices[i]]
@@ -80,27 +79,28 @@ def save_overlap_domains_to_fasta(cluster_residues, sorted_cluster_indices, pdb_
 
         current_cluster_sequence = ''.join(three_to_one(residue.get_resname()) for residue in current_cluster_residue_list)
         next_cluster_sequence = ''.join(three_to_one(residue.get_resname()) for residue in next_cluster_residue_list)
-        concatenated_sequence = concatenated_sequence + current_cluster_sequence + next_cluster_sequence
-
-        if len(concatenated_sequence) >= min_cluster_size:
+        concatenated_sequence = concatenated_sequence + current_cluster_sequence + next_cluster_sequence        
+        overlap_length += len(next_cluster_sequence)
+        if len(concatenated_sequence) >= min_cluster_size and overlap_length >= min_ov_size:
+            domains_combined = domains_combined + f'{sorted_cluster_indices[i] + 1}-' + f'{sorted_cluster_indices[i + 1] + 1}' 
             for j in range(symmetry):
-                seq_record = SeqRecord(Seq(concatenated_sequence), id=f'domain_{sorted_cluster_indices[i] + 1}-{sorted_cluster_indices[i + 1] + 1}_copy{j + 1}', description='')
+                seq_record = SeqRecord(Seq(concatenated_sequence), id=domains_combined, description='')
                 seq_records.append(seq_record)
-            overlap_length = len(next_cluster_sequence)
             overlap_lengths.append(overlap_length)
+            pairs.append(domains_combined)
+            domains_combined = ''
             fasta_filename = f'{pdb_file.split(".")[0]}_seq_{k}.fasta'
             SeqIO.write(seq_records, fasta_filename, "fasta")
             concatenated_sequence = ''
+            overlap_length = 0
             k += 1
-
-    csv_filename = f'{pdb_file.split(".")[0]}_overlaps_2.csv'
-    with open(csv_filename, mode='w', newline='') as csvfile:
-        fieldnames = ['Pair', 'Overlap Length']
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-        writer.writeheader()
-        for i, overlap_length in enumerate(overlap_lengths):
-            pair_name = f'domain_{sorted_cluster_indices[i]+1}-{sorted_cluster_indices[i+1]+1}'
-            writer.writerow({'Pair': pair_name, 'Overlap Length': overlap_length})
+    
+        else:
+            concatenated_sequence = concatenated_sequence + current_cluster_sequence
+            domains_combined = domains_combined + f'{sorted_cluster_indices[i] + 1}-'
+        
+    df_overhang = pd.DataFrame({'Concatenated Domains': pairs, 'Overhang Length': overlap_lengths})
+    df_overhang.to_csv(f'{pdb_file.split(".")[0]}_overhangs.csv', index=False)
 
 def save_pdb_clusters(structure, cluster_residues, pdb_file):
     # Get all chains in the structure
