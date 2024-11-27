@@ -18,6 +18,7 @@ def main():
         'min_k': 3,
         'max_k': 6,
         'min_domain_size': 120,
+        'min_ov_size': 50,
         'number_of_chains': 3,
         'pair_distance_constant': 1,
         'save_overlap_domains': False,
@@ -34,6 +35,7 @@ def main():
     parser.add_argument("-k", "--max_k", type=int, default=_defaults['max_k'], help=f'Maximum number of possible kmean clusters. Default: {_defaults["max_k"]}')
     parser.add_argument("-mk", "--min_k", type=int, default=_defaults['min_k'], help=f'Minimum number of possible kmean clusters. Default: {_defaults["min_k"]}')
     parser.add_argument("-s", "--min_domain_size", type=int, default=_defaults['min_domain_size'], help=f'Minimal possible domain size. Default: {_defaults["min_domain_size"]}')
+    parser.add_argument("-ovs", "--min_ov_size", type=int, default=_defaults['min_ov_size'], help=f'Minimal possible overhang size. Default: {_defaults["min_ov_size"]}')
     parser.add_argument("-pd", "--pair_distance_constant", type=float, default=_defaults['pair_distance_constant'], help=f'The pair distance constant will influence how the sDp is calculated. Default: {_defaults["pair_distance_constant"]}')
     parser.add_argument("-n", "--number_of_chains", type=int, default=_defaults['number_of_chains'], help=f'Tail fibre symmetry. Default: {_defaults["number_of_chains"]}')
     parser.add_argument("-e", "--experimental_structure", action='store_true', help=f'Add this flag if the input is not an Alphafold/ESMfold prediction with bfactors set as the pLDDT value.')
@@ -53,7 +55,7 @@ def main():
         clusters, umap_result = perform_clustering(sdp_matrix, args.clustering_method, args.min_k, args.max_k, args.min_domain_size, args.optimize_umap)
         
         structure_full = load_structure(args.pdb, args.only_single_chain)
-        save_results(structure_full, clusters, residues, args.save_overlap_domains, args.save_pdb_domains, args.pdb, args.number_of_chains, args.min_domain_size)
+        save_results(structure_full, clusters, residues, args.save_overlap_domains, args.save_pdb_domains, args.pdb, args.number_of_chains, args.min_domain_size, args.min_ov_size)
         visualize_results(sdp_matrix, umap_result, clusters, args.pdb)
         logger.info("Main process completed successfully")
     except Exception as e:
