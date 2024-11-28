@@ -63,6 +63,23 @@ def save_results(structure, clusters, residues, save_overlap_domains, save_pdb_d
 
     cluster_residues = split_cluster(cluster_residues)
     sorted_cluster_indices = np.argsort([np.mean([residue.id[1] for residue in cluster]) for cluster in cluster_residues])
+    # Check the last sorted cluster for minimum size
+    last_cluster = cluster_residues[sorted_cluster_indices[-1]]
+    
+    while len(last_cluster) < min_cluster_size:
+        # Concatenate with the previous cluster
+        if len(sorted_cluster_indices) < 2:
+            raise ValueError("Not enough clusters to meet the minimum cluster size requirement.")
+        previous_cluster_index = sorted_cluster_indices[-2]
+        last_cluster = cluster_residues[previous_cluster_index] + last_cluster
+        
+        # Remove the previous cluster as it's now part of the last one
+        sorted_cluster_indices = sorted_cluster_indices[:-1]
+        cluster_residues[sorted_cluster_indices[-1]] = last_cluster
+
+        # Break if the concatenation meets the size
+        if len(last_cluster) >= min_cluster_size:
+            break
 
     if save_overlap_domains:
         save_overlap_domains_to_fasta(cluster_residues, sorted_cluster_indices, pdb_file, symmetry, min_cluster_size,min_cluster_size)
@@ -72,6 +89,7 @@ def save_results(structure, clusters, residues, save_overlap_domains, save_pdb_d
 
 def save_overlap_domains_to_fasta(cluster_residues, sorted_cluster_indices, pdb_file, symmetry, min_cluster_size,min_ov_size):
     overlap_lengths, pairs, k, concatenated_sequence, domains_combined, overlap_length = [], [], 0, '', '', 0
+    
     for i in range(len(sorted_cluster_indices) - 1):
         seq_records = []
         current_cluster_residue_list = cluster_residues[sorted_cluster_indices[i]]
@@ -79,12 +97,13 @@ def save_overlap_domains_to_fasta(cluster_residues, sorted_cluster_indices, pdb_
 
         current_cluster_sequence = ''.join(three_to_one(residue.get_resname()) for residue in current_cluster_residue_list)
         next_cluster_sequence = ''.join(three_to_one(residue.get_resname()) for residue in next_cluster_residue_list)
-        concatenated_sequence = concatenated_sequence + current_cluster_sequence + next_cluster_sequence        
+        concatenated_sequence_tmp = concatenated_sequence + current_cluster_sequence + next_cluster_sequence        
         overlap_length += len(next_cluster_sequence)
-        if len(concatenated_sequence) >= min_cluster_size and overlap_length >= min_ov_size:
+
+        if len(concatenated_sequence_tmp) >= min_cluster_size and overlap_length >= min_ov_size:
             domains_combined = domains_combined + f'{sorted_cluster_indices[i] + 1}-' + f'{sorted_cluster_indices[i + 1] + 1}' 
             for j in range(symmetry):
-                seq_record = SeqRecord(Seq(concatenated_sequence), id=domains_combined, description='')
+                seq_record = SeqRecord(Seq(concatenated_sequence_tmp), id=domains_combined, description='')
                 seq_records.append(seq_record)
             overlap_lengths.append(overlap_length)
             pairs.append(domains_combined)
