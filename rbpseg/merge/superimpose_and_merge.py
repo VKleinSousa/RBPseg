@@ -51,8 +51,6 @@ def superimpose_and_merge(pdb_files, overhang_size, superposition, name, overhan
         
         ov_index = 0
         overhang_size = int(overhang_list.iloc[:, ov_index])
-        print(overhang_list)
-        print(overhang_size)
         
         for i in range(0, 5):
             fixed_structure = parser.get_structure('fixed_structure', pdb_files[i])
@@ -97,7 +95,6 @@ def superimpose_and_merge(pdb_files, overhang_size, superposition, name, overhan
         best_point = np.argmin(per_residue_rmsd)
         per_chain_rmsd = pd.DataFrame(per_chain_rmsd)
         interface_rmsd = per_chain_rmsd.iloc[:, [np.argmin(per_residue_rmsd)]]
-        print(interface_rmsd , per_chain_rmsd)
         deleted_overhang = delete_overhang(fixed_structure, moving_structure, overhang_size, np.argmin(per_residue_rmsd))
         moving_structure, chain_pairs = rename_chains_2(fixed_structure, moving_structure, interface_rmsd, change_bfactor)
         merge_chains(moving_structure, chain_pairs)
