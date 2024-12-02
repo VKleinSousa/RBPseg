@@ -184,7 +184,7 @@ In some cases—most often with beta-sandwich domains or helix-coil-helix domain
 ---
 
 ### **Chain Pairing**
-Determining the correct chain pairing between fractions can be a complex challenge. For a random assignment of two fractions, there is a 1/6 chance of finding the correct pair. This probability further decreases exponentially with the number of chains, following the formula \( (1/6)^{(n-1)} \).
+Determining the correct chain pairing between fractions can be a complex challenge. For a random assignment of two fractions, there is a 1/6 chance of finding the correct pair. This probability further decreases exponentially with the number of fractions (n), following the formula \( (1/6)^{(n-1)} \).
 
 RBPseg provides two methods to find the optimal pairing, both of which aim to minimize the distance between chains:
 1. **Spherical Constraint Method (Default):**  
