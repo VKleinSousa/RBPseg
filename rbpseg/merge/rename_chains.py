@@ -1,6 +1,9 @@
 import numpy as np
 import pandas as pd
 import random
+from scipy.cluster.hierarchy import linkage, fcluster
+from scipy.spatial.distance import pdist
+import scipy.cluster.hierarchy as such
 
 def find_last_atom_position(fixed_structure, moving_structure):
     """
@@ -71,7 +74,104 @@ def check_line_sphere_intersection(vertex, fourth_point, sphere):
 
     return distance_to_center < sphere['radius'], line_length
 
-def rename_chains_2(fixed_structure, moving_structure, interface_rmsd, change_bfactor):
+
+def nearest_point(all_centroids):
+    distance_matrix = pdist(all_centroids)
+    print(distance_matrix)
+    # Perform hierarchical clustering
+    linkage_matrix = linkage(distance_matrix, method='single')
+    distance_threshold = 1.5  # Adjust threshold
+    clusters = fcluster(linkage_matrix, t=distance_threshold, criterion='distance')
+    dendrogram = sch.dendrogram(linkage_matrix)
+
+    # Retrieve the leaf order
+    leaf_order = dendrogram['leaves']
+    return leaf_order
+
+def rename_chains_hh(fixed_structure, moving_structure, interface_rmsd, change_bfactor):
+    """
+    Rename chains in the moving structure based on the best matching pair with the fixed structure.
+
+    Args:
+        fixed_structure
+        moving_structure
+        interface_rmsd: RMSD values between chains.
+        change_bfactor: Whether to modify the B-factor of atoms.
+    """
+    last_fixed, chains_fixed_positions, chain_id_fixed = [], [], []
+    first_moving, chains_moving_positions, chain_id_moving = [], [], []
+
+    # Collect fixed structure chain details
+    for model in fixed_structure:
+        for chain in model:
+            residues = list(chain.get_residues())
+            last_residue = residues[-1]
+            last_fixed.extend(last_residue.get_atoms())
+            chain_id_fixed.append(chain.id)
+            if change_bfactor:
+                for atom in last_residue.get_atoms():
+                    atom.set_bfactor(-1)
+            pos_fixed = sum(atom.get_coord() for atom in last_fixed) / len(last_fixed)
+            chains_fixed_positions.append(pos_fixed)
+            last_fixed = []
+
+    # Collect moving structure chain details
+    for model in moving_structure:
+        for chain in model:
+            residues = list(chain.get_residues())
+            first_residue = residues[0]
+            first_moving.extend(first_residue.get_atoms())
+            chain_id_moving.append(chain.id)
+            if change_bfactor:
+                for atom in first_residue.get_atoms():
+                    atom.set_bfactor(-1)
+            pos_moving = sum(atom.get_coord() for atom in first_moving) / len(first_moving)
+            chains_moving_positions.append(pos_moving)
+            first_moving = []
+
+    # Create centroid arrays
+    vertices = np.array(chains_fixed_positions)  # Fixed chain centroids
+    vertices_up = np.array(chains_moving_positions)  # Moving chain centroids
+    all_centroids = np.vstack((vertices, vertices_up))  # Combined centroids for clustering
+
+    # Perform hierarchical clustering or nearest point mapping
+    # Assuming nearest_point is a valid function implemented elsewhere
+    leaf_order = nearest_point(all_centroids)
+    print("Leaf order:", leaf_order)
+
+    # Separate `leaf_order` into fixed and moving indices
+    fixed_indices = range(len(chain_id_fixed))  # Fixed chain indices
+    moving_indices = range(len(chain_id_fixed), len(chain_id_fixed) + len(chain_id_moving))  # Moving chain indices
+
+    fixed_leaf_order = [idx for idx in leaf_order if idx in fixed_indices]
+    moving_leaf_order = [idx - len(chain_id_fixed) for idx in leaf_order if idx in moving_indices]
+
+    print("Fixed leaf order:", fixed_leaf_order)
+    print("Moving leaf order:", moving_leaf_order)
+
+    # Assign new chain IDs to moving structure
+    new_moving_chains = ['E', 'F', 'G']
+    for model in moving_structure:
+        for i, chain in enumerate(model):
+            if i < len(new_moving_chains):  # Ensure no overflow of new IDs
+                chain.id = new_moving_chains[i]
+
+    # Create chain pairs based on the leaf order
+    chain_pairs = []
+    for fixed_idx, moving_idx in zip(fixed_leaf_order, moving_leaf_order):
+        fixed_chain_id = chain_id_fixed[fixed_idx]
+        moving_chain_id = new_moving_chains[moving_idx]
+        chain_pairs.append([moving_chain_id, fixed_chain_id])
+    chain_pairs = sorted(chain_pairs, key=lambda x: x[0])
+    print("Chain pairs:", chain_pairs)
+    
+    for model in fixed_structure:
+        for chain in model:
+            moving_structure[0].add(chain.copy())
+    
+    return moving_structure, chain_pairs
+
+def rename_chains_spherical(fixed_structure, moving_structure, interface_rmsd, change_bfactor):
     """
     Rename chains in the moving structure based on the best matching pair with the fixed structure.
     """
@@ -86,7 +186,8 @@ def rename_chains_2(fixed_structure, moving_structure, interface_rmsd, change_bf
     if isinstance(interface_rmsd, pd.Series):
         # Convert to NumPy array and flatten
         interface_rmsd = interface_rmsd.values.flatten()
-    print(interface_rmsd)
+        
+    print('interface_rmsd:',interface_rmsd)
     df = pd.DataFrame({
         'rms': interface_rmsd,
         'pair': pairs,
@@ -124,7 +225,7 @@ def rename_chains_2(fixed_structure, moving_structure, interface_rmsd, change_bf
 
     vertices = np.array(chains_fixed_positions)
     vertices_up = np.array(chains_moving_positions)
-
+    print(vertices,vertices_up)
     triangle_center = find_triangle_center(vertices_up)
     triangle_height = calculate_triangle_height(vertices_up)
     sphere_radius = triangle_height / 3.0
@@ -193,7 +294,7 @@ def rename_chains_2(fixed_structure, moving_structure, interface_rmsd, change_bf
     for model in fixed_structure:
         for chain in model:
             moving_structure[0].add(chain.copy())
-
+    print(chain_pairs)
     return moving_structure, chain_pairs
 
 

@@ -1,12 +1,13 @@
 from Bio.PDB import PDBParser
 from Bio.SVDSuperimposer import SVDSuperimposer
+from scipy.spatial import ConvexHull
 import numpy as np
 
 def calculate_per_residue_rmsd(fixed_structure, moving_structure, overhang_size):
     # Perform the superimposition and obtain the transformed structure and RMSD
-    print(overhang_size)
-    print(fixed_structure)
-    print(moving_structure)
+    print('Pre-calculared overhang size:',overhang_size)
+    #print(fixed_structure)
+    #print(moving_structure)
     transformed_structure, overall_rmsd = superimpose_overhangs(fixed_structure, moving_structure, overhang_size)
     
     # Initialize a list to store per-residue RMSD for each chain
@@ -52,7 +53,16 @@ def calculate_per_residue_rmsd(fixed_structure, moving_structure, overhang_size)
     per_residue_rmsd = np.mean(per_chain_rmsd, axis=0)
 
     return transformed_structure, per_residue_rmsd, overall_rmsd, per_chain_rmsd
-    
+
+def calculate_principal_axis(structure):
+
+    coords = np.array([atom.get_coord() for atom in structure.get_atoms()])
+    cov_matrix = np.cov(coords, rowvar=False)
+    eigenvalues, eigenvectors = np.linalg.eigh(cov_matrix)
+    principal_axis = eigenvectors[:, np.argmax(eigenvalues)]
+
+    return principal_axis
+
 def superimpose_overhangs(fixed_structure, moving_structure, overhang_size):
     # Calculates the global superimposition of both models.
     last_fixed = []  # saves the C terminal residues of the fixed structure
@@ -92,6 +102,7 @@ def superimpose_overhangs(fixed_structure, moving_structure, overhang_size):
     
     if centroid_fixed[0] * centroid_fixed[1] * centroid_fixed[2] * centroid_moving_last[0] * centroid_moving_last[1] * centroid_moving_last[2] < 0:
         # If models are pointing to different directions, flip the moving structure.
+        print('***Flipping moving structure***')
         for atom in moving_structure.get_atoms():
             atom.set_coord(-1 * atom.get_coord())
         # Recalculate the centroids of the moving structure
@@ -101,9 +112,8 @@ def superimpose_overhangs(fixed_structure, moving_structure, overhang_size):
     vector_fixed = np.array([atom.get_coord() for atom in last_fixed])
     vector_moving = np.array([atom.get_coord() for atom in first_moving])
 
-
-    print(f"Fixed vector size: {vector_fixed.shape}")
-    print(f"Moving vector size: {vector_moving.shape}")
+    print(f"Fixed vector size: {vector_fixed.shape}; ID: {fixed_structure.id}")
+    print(f"Moving vector size: {vector_moving.shape}; ID: {moving_structure.id}")
 
     # Initialize the Superimposer with the selected atoms
     superimposer = SVDSuperimposer()

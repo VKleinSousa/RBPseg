@@ -6,7 +6,7 @@ import hdbscan
 from scipy.spatial.distance import cdist
 import numpy as np
 import logging
-import sys  # Import sys for exiting with error codes
+import sys  
 import pandas as pd
 from sklearn.cluster import SpectralClustering
 from rbpseg.strclust import *
@@ -105,7 +105,7 @@ def spectral_clustering_sdp(sdp_matrix, min_k=3, max_k=20, smoothing_window=3, g
     # Step 5: Perform spectral clustering with the optimal number of clusters
     spectral_clustering = SpectralClustering(n_clusters=optimal_k, affinity='precomputed')
     clusters = spectral_clustering.fit_predict(sdp_matrix)
-
+    print(clusters)
     # Log the optimal number of clusters
     logger.info(f"Spectral clustering completed with optimal_k={optimal_k}")
 
