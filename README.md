@@ -15,8 +15,8 @@ To get started with `RBPseg`, follow the steps below.
 
 Clone this repository to your local machine:
 ```bash
-git clone https://github.com/VKleinSousa/rbpseg.git
-cd rbpseg
+git clone https://github.com/VKleinSousa/RBPseg.git
+cd RBPseg
 ```
 
 ```bash
@@ -113,5 +113,87 @@ bioRxiv 2024.10.28.620165; doi: https://doi.org/10.1101/2024.10.28.620165***
 
 ```
 
+---
 
+## FAQ
 
+### **Which clustering mode should I use to find my fractions?**
+The choice of clustering mode depends on the type of tail fiber you are analyzing and the available computing resources. Here’s a breakdown:
+- **HDBSCAN:**  
+   - Used in the original study, it is reliable for capturing elongated domains.  
+   - Tends to generate larger FASTA files, often grouping consecutive globular domains into a single domain.  
+   - **Best for:** Overall assembly of the fiber.  
+- **Spectral/Kmeans Clustering:**  
+   - Produces smaller, more detailed domain fragments.  
+   - Suitable for studies focused on domain organization and finer structural details.  
+   - However, these smaller fragments may lead to challenges in assembling the final fiber correctly, with risks of missed assignments or poor superposition.  
+   - **Best for:** Analyzing detailed domain organization.
+
+**Recommendation:**  
+If your goal is to assemble the fiber structure, HDBSCAN is the preferred option. For detailed domain studies, Spectral/Kmeans may be better suited.
+
+---
+
+### **I have my AlphaFold predictions of my fractions. How do I prepare my files to run the merging module?**
+RBPseg-merge works best when your AlphaFold models are organized into a specific directory structure. The directory should look like this:
+
+- * I have my AF predictions of my fractions, how do I prepare my files to run the merging module?*
+    RBPseg-merge often works better if you have an specific directiory with all your AF models in this manner:
+    ```
+	AFmodels/
+	    {fraction_number}_fibername_{model_number}
+	Example:
+	    0_coolfiber_0.pdb
+	    0_coolfiber_1.pdb
+	    ...
+	    1_coolfiber_0.pdb
+	    ...
+	    5_coolfiber_5.pdb
+
+    ```
+If your AlphaFold results are in a single folder, you can use the following script to automatically prepare your files:
+
+``` rbpseg/merge/prepare_files_for_merge.py``` 
+
+---
+
+### **How many models per fraction should I have?**
+Currently, **RBPseg works best with 5 models per fraction.** We are working to generalize this in future updates.
+
+---
+
+### **Have more questions?**
+For additional inquiries, please don't hesitate to contact us. We’re happy to help!
+
+---
+
+# Frequent Problems
+
+## Superposition and Chain Pairing
+
+### **Superposition**
+In some cases—most often with beta-sandwich domains or helix-coil-helix domains—the consecutive domain may be superimposed with the wrong directionality, leading to a misaligned and incorrect assembly.
+
+#### **Recommendations to resolve this issue:**
+- **Adjust the segmentation parameters:**  
+   Try running `rbpseg-sdp` with modified parameters. Increasing the values for `--min_domain_size` and `--min_ov_size` often helps resolve this issue by producing fewer but larger FASTA files. Larger models are typically easier to superimpose correctly.
+- **Manual assembly:**  
+   If automatic assembly fails, consider manually assembling your fractions using software like ChimeraX or PyMOL.
+
+---
+
+### **Chain Pairing**
+Determining the correct chain pairing between fractions can be a complex challenge. For a random assignment of two fractions, there is a 1/6 chance of finding the correct pair. This probability further decreases exponentially with the number of chains, following the formula \( (1/6)^{(n-1)} \).
+
+RBPseg provides two methods to find the optimal pairing, both of which aim to minimize the distance between chains:
+1. **Spherical Constraint Method (Default):**  
+   This method applies a spherical constraint that prevents chains from crossing the inner chain space. However, if the algorithm cannot converge, it may randomly assign a chain.
+2. **Hierarchical Clustering Method:**  
+   This method uses `scipy.cluster.hierarchy.linkage` to find the chain pair with the minimal distance. Unlike the default method, it does not apply any geometric constraints.
+
+#### **Common Problems and Causes:**
+- Issues often arise in regions with loops or disordered areas where symmetry breaks subtly. In such cases, the correct chain may not always be the closest neighbor, leading to incorrect assignments.
+
+#### **How to avoid this issue:**
+- **Reduce the number of fractions:**  
+   Creating fewer fractions can simplify the pairing process and reduce errors.
