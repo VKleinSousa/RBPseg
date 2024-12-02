@@ -6,7 +6,7 @@ import hdbscan
 from scipy.spatial.distance import cdist
 import numpy as np
 import logging
-import sys  # Import sys for exiting with error codes
+import sys  
 import pandas as pd
 from sklearn.cluster import SpectralClustering
 from rbpseg.strclust import *
