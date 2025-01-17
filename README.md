@@ -34,7 +34,7 @@ pip install .
 Conda install the remaining dependencies
 
 ```
-conda install -c conda-forge pdbfixer openmm
+conda install -c conda-forge -c bioconda foldseek pdbfixer openmm
 ```
 
 
@@ -89,6 +89,21 @@ rbpseg-sdp -p Examples/Example3-PseudoDomain/rbp_11.pdb -k 20 -sv
 
 ![sdpspectral](./Examples/Example3-PseudoDomain/rbp_11_combined_plots_spectral.png)
 
+
+#### Example 3: Classifying your own RBP into TC or D-Classes
+
+```bash
+rbpseg-classify -p input_protein.pdb -o output_dir -db 0
+````
+
+```bash
+  -p PDB, --pdb PDB     Path to the input PDB file.
+  -o OUTPUT_PATH, --output_path OUTPUT_PATH
+                        Directory to store output results.
+  -db {0,1}, --target_db {0,1}
+                        Classification target: 0 for TC classes, 1 for domain classification.
+
+```
 
 ## Reference ##
 
