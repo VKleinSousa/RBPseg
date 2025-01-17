@@ -21,7 +21,7 @@ cd RBPseg
 ```
 
 ```bash
-conda create -n rbpseg_env python=3.10
+conda create -n rbpseg_env python=3.9
 conda activate rbpseg_env
 ```
 
