@@ -191,8 +191,8 @@ def main():
         # Construct paths to the TC and D databases
         TC_db_path = os.path.join(data_dir, "TC_DB/TC_DB")
         D_db_path = os.path.join(data_dir, "D_DB/D_DB")
-        #TC_db_path = '/maps/projects/cpr_sbmm/people/shj152/software/RBPseg/test/RBPseg/Data/TC_DB/TC_DB'
-        #D_db_path = '/maps/projects/cpr_sbmm/people/shj152/software/RBPseg/test/RBPseg/Data/D_DB/D_DB'
+        
+        
 
         if args.target_db == 0:
             results_path = os.path.join(args.output_path, "TC_matches.tsv")
