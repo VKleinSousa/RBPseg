@@ -1,0 +1,6 @@
+include README.md
+include LICENSE
+include rbpseg/Data/TC_DB/*
+include rbpseg/Data/D_DB/*
+recursive-include rbpseg/Data/*
+

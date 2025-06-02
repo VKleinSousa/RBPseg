@@ -21,7 +21,7 @@ cd RBPseg
 ```
 
 ```bash
-conda create -n rbpseg_env python=3.10
+conda create -n rbpseg_env python=3.9
 conda activate rbpseg_env
 ```
 
@@ -34,7 +34,7 @@ pip install .
 Conda install the remaining dependencies
 
 ```
-conda install -c conda-forge pdbfixer openmm
+conda install -c conda-forge -c bioconda foldseek pdbfixer openmm
 ```
 
 
@@ -89,6 +89,21 @@ rbpseg-sdp -p Examples/Example3-PseudoDomain/rbp_11.pdb -k 20 -sv
 
 ![sdpspectral](./Examples/Example3-PseudoDomain/rbp_11_combined_plots_spectral.png)
 
+
+#### Example 3: Classifying your own RBP into TC or D-Classes
+
+```bash
+rbpseg-classify -p input_protein.pdb -o output_dir -db 0
+````
+
+```bash
+  -p PDB, --pdb PDB     Path to the input PDB file.
+  -o OUTPUT_PATH, --output_path OUTPUT_PATH
+                        Directory to store output results.
+  -db {0,1}, --target_db {0,1}
+                        Classification target: 0 for TC classes, 1 for domain classification.
+
+```
 
 ## Reference ##
 
@@ -184,7 +199,7 @@ In some cases—most often with beta-sandwich domains or helix-coil-helix domain
 ---
 
 ### **Chain Pairing**
-Determining the correct chain pairing between fractions can be a complex challenge. For a random assignment of two fractions, there is a 1/6 chance of finding the correct pair. This probability further decreases exponentially with the number of chains, following the formula \( (1/6)^{(n-1)} \).
+Determining the correct chain pairing between fractions can be a complex challenge. For a random assignment of two fractions, there is a 1/6 chance of finding the correct pair. This probability further decreases exponentially with the number of fractions (n), following the formula \( (1/6)^{(n-1)} \).
 
 RBPseg provides two methods to find the optimal pairing, both of which aim to minimize the distance between chains:
 1. **Spherical Constraint Method (Default):**  

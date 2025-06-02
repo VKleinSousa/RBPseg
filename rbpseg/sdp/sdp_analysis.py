@@ -24,7 +24,6 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
         logging.StreamHandler(sys.stdout),  # Log to console
-        logging.FileHandler("protein_analysis.log")  # Log to a file
     ]
 )
 
