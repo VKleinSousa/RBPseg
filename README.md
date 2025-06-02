@@ -213,3 +213,5 @@ RBPseg provides two methods to find the optimal pairing, both of which aim to mi
 #### **How to avoid this issue:**
 - **Reduce the number of fractions:**  
    Creating fewer fractions can simplify the pairing process and reduce errors.
+
+Version 1.1
