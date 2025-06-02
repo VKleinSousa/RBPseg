@@ -100,6 +100,15 @@ def superimpose_and_merge(pdb_files, overhang_size, superposition, name, overhan
         # Rename chains in the chosen structures
         fixed_structure = rename_chain_if_exists(best_fixed_structure)
         moving_structure = rename_chain_if_exists(best_moving_structure)
+        
+        # Remove hydrogens
+        fixed_structure = remove_all_hydrogens(fixed_structure)
+        moving_structure = remove_all_hydrogens(moving_structure)
+        
+        # Remove oxt
+        fixed_structure = remove_oxt_atom(fixed_structure)
+        moving_structure = remove_oxt_atom(moving_structure)
+        
         print('Merging first two fractions...')
         moving_structure, per_residue_rmsd, overall_rmsd, per_chain_rmsd = calculate_per_residue_rmsd(
             fixed_structure, moving_structure, overhang_size
