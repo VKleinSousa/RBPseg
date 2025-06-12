@@ -34,7 +34,7 @@ pip install .
 Conda install the remaining dependencies
 
 ```
-conda install -c conda-forge -c bioconda foldseek pdbfixer openmm
+conda install -c conda-forge -c bioconda foldseek pdbfixer openmm usalign
 ```
 
 
