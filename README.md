@@ -1,5 +1,21 @@
 # RBPseg: A Tool for Tail Fiber Structure Prediction
 
+## Table of Contents
+- [Installation](#installation)
+  - [Requirements](#requirements)
+- [Usage](#usage)
+- [Examples](#examples)
+  - [Example 1: Creating fraction fastas using an ESMfold model](#example-1-creating-fraction-fastas-using-an-esmfold-model)
+  - [Example 2: Merging fractions](#example-2-merging-fractions)
+  - [Example 3: Finding pseudo-domains](#example-3-finding-pseudo-domains)
+  - [Example 4: Classifying your own RBP into TC or D-Classes](#example-4-classifying-your-own-rbp-into-tc-or-d-classes)
+- [Reference](#reference)
+- [FAQ](#faq)
+- [Frequent Problems](#frequent-problems)
+  - [Superposition and Chain Pairing](#superposition-and-chain-pairing)
+
+
+
 **RBPseg** is a pipeline designed to predict and analyze phage tail fiber proteins. It has three major modules. First, it uses structural information (ESMfold/ColabFold/Alphafold) monomeric prediction to find pseudo-domains in the fiber and fractionate its sequence to '.FASTA' files (using the sDp approach) that can be further predicted using AlphaFold-multimer as trimers. The fraction modules can be merged together into a full fiber structure. RBPseg also has a built structural clustering metric (SM/pSM) that estimate the optimal number of clusters giving a TM-score matrix. 
 
 ## Installation
