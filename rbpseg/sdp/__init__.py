@@ -36,17 +36,3 @@ from .results_processing import (
     three_to_one,
     split_cluster
 )
-
-import logging
-
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,  # Set the logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.StreamHandler(sys.stdout),  # Log to console
-        logging.FileHandler("protein_analysis.log")  # Log to a file
-    ]
-)
-
-logger = logging.getLogger(__name__)

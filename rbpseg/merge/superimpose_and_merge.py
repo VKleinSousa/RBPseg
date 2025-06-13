@@ -6,6 +6,7 @@ from .superimpose import calculate_per_residue_rmsd
 from .rename_chains import rename_chains_spherical, rename_chains_hh
 from .trim_chains import delete_overhang
 from .merge_chains import merge_chains
+
 def rename_chain_if_exists(structure, original_chain_id='A', new_chain_id='D'):
     """
     Rename the chain with ID `original_chain_id` to `new_chain_id` if it exists in the structure.
@@ -48,10 +49,11 @@ def get_structure_name(pdb_file):
     structure_name = os.path.splitext(basename)[0]
     return structure_name
     
-def superimpose_and_merge(pdb_files, overhang_size, superposition, name, overhang_list, change_bfactor, chain_mode=0):
+def superimpose_and_merge(pdb_files,sequence_counts, overhang_size, superposition, name, overhang_list, change_bfactor, chain_mode=0):
     parser = PDBParser(QUIET=True)
+
     
-    if len(pdb_files) > 5:
+    if len(pdb_files) > sequence_counts[0]:
         fixed_structure = None
         moving_structure = None
         rmsd = 100000
@@ -59,7 +61,8 @@ def superimpose_and_merge(pdb_files, overhang_size, superposition, name, overhan
         ov_index = 0
         overhang_size = int(overhang_list.iloc[:, ov_index])
         
-        for i in range(0, 5):
+        for i in range(0, sequence_counts[0]):
+            #print(i)
             fixed_structure = parser.get_structure(get_structure_name(pdb_files[i]), pdb_files[i])
             print('fixed_structure is', pdb_files[i])
 
@@ -67,7 +70,8 @@ def superimpose_and_merge(pdb_files, overhang_size, superposition, name, overhan
             fixed_structure = remove_all_hydrogens(fixed_structure)
             fixed_structure = remove_oxt_atom(fixed_structure)
             fixed_structure = rename_chain_if_exists(fixed_structure)
-            for j in range(5, 10):
+            
+            for j in range(sequence_counts[0], sequence_counts[0]+sequence_counts[1]):
                 moving_structure = parser.get_structure(get_structure_name(pdb_files[j]), pdb_files[j])
                 print('moving_structure is', pdb_files[j])
 
@@ -78,22 +82,21 @@ def superimpose_and_merge(pdb_files, overhang_size, superposition, name, overhan
                  
                 if superposition == 0:
                     print('Pair:',[i, j])
-                    moving_structure_tmp, per_residue_rmsd, overall_rmsd, per_chain_rmsd = calculate_per_residue_rmsd(
+                    moving_structure_tmp, per_residue_rmsd, overall_rmsd = calculate_per_residue_rmsd(
                         fixed_structure, moving_structure, overhang_size
                     )
-                    best_point = np.argmin(per_residue_rmsd)
-                    per_chain_rmsd = pd.DataFrame(per_chain_rmsd)
-                    interface_rmsd = per_chain_rmsd.iloc[:, [np.argmin(per_residue_rmsd)]]
+                    magnitudes = np.linalg.norm(per_residue_rmsd, axis=1)
+                    best_point = np.argmin(magnitudes)
                     
-                    if np.mean(interface_rmsd) < rmsd:
+                    if magnitudes[best_point] < rmsd:
                         pair = [i, j]
                         best_fixed_structure = parser.get_structure(get_structure_name(pdb_files[i]), pdb_files[i])
                         best_moving_structure_name = get_structure_name(pdb_files[i])+'+'+get_structure_name(pdb_files[j])
                         best_moving_structure = parser.get_structure(best_moving_structure_name, pdb_files[j])
-                        print(f'New pair: {best_moving_structure_name} and interface rmsd: {np.mean(interface_rmsd)}')
-                        rmsd = np.mean(interface_rmsd)
+                        print(f'New pair: {best_moving_structure_name} and interface rmsd: {magnitudes[best_point]}')
+                        rmsd = magnitudes[best_point]
 
-        print('Pair:',pair)
+        print('Best Structural Pair:',pair)
         best_fixed_structure = parser.get_structure(get_structure_name(pdb_files[pair[0]]), pdb_files[pair[0]])
         best_moving_structure_name = get_structure_name(pdb_files[pair[1]])+'+'+get_structure_name(pdb_files[pair[1]])
         best_moving_structure = parser.get_structure(best_moving_structure_name, pdb_files[j])
@@ -108,15 +111,18 @@ def superimpose_and_merge(pdb_files, overhang_size, superposition, name, overhan
         # Remove oxt
         fixed_structure = remove_oxt_atom(fixed_structure)
         moving_structure = remove_oxt_atom(moving_structure)
+
         
         print('Merging first two fractions...')
-        moving_structure, per_residue_rmsd, overall_rmsd, per_chain_rmsd = calculate_per_residue_rmsd(
+        moving_structure, per_residue_rmsd, overall_rmsd = calculate_per_residue_rmsd(
             fixed_structure, moving_structure, overhang_size
         )
-        best_point = np.argmin(per_residue_rmsd)
-        per_chain_rmsd = pd.DataFrame(per_chain_rmsd)
-        interface_rmsd = per_chain_rmsd.iloc[:, [np.argmin(per_residue_rmsd)]]
-        deleted_overhang = delete_overhang(fixed_structure, moving_structure, overhang_size, np.argmin(per_residue_rmsd))
+        magnitudes = np.linalg.norm(per_residue_rmsd, axis=1)
+        best_point = np.argmin(magnitudes)
+
+        #per_chain_rmsd = pd.DataFrame(per_chain_rmsd)
+        interface_rmsd = per_residue_rmsd[best_point]
+        deleted_overhang = delete_overhang(fixed_structure, moving_structure, overhang_size, best_point)
         if chain_mode == 0:
             moving_structure, chain_pairs = rename_chains_spherical(fixed_structure, moving_structure, interface_rmsd, change_bfactor)
         elif chain_mode == 1:
@@ -126,16 +132,18 @@ def superimpose_and_merge(pdb_files, overhang_size, superposition, name, overhan
         
         fixed_structure = moving_structure
         fixed_structure = remove_oxt_atom(fixed_structure)
+        
 
-        for i in range(10, len(pdb_files), 5):
-            if i + 5 > len(pdb_files):
+        for i in range(sequence_counts[0]+sequence_counts[1], len(pdb_files), sequence_counts[1]):
+            #print(i)
+            if i + sequence_counts[0] > len(pdb_files):
                 print('Finished aligning and merging')
             else:
                 print('Merging next segment')
                 pair = []
                 ov_index += 1
                 
-                for j in range(0, 5):
+                for j in range(0, sequence_counts[0]):
                     current_structure = parser.get_structure(get_structure_name(pdb_files[i + j]), pdb_files[i + j])
                     print('Current structure:', get_structure_name(pdb_files[i + j]))
 
@@ -147,22 +155,20 @@ def superimpose_and_merge(pdb_files, overhang_size, superposition, name, overhan
                     rmsd = 100000
                     moving_structure = current_structure
                     overhang_size = int(overhang_list.iloc[:, ov_index])
-                    print('Overhang size:', overhang_size)
+                    #print('Overhang size:', overhang_size)
                     
                     if superposition == 0:
                         print('Finding optimal merging point...')
-                        moving_structure, per_residue_rmsd, overall_rmsd, per_chain_rmsd = calculate_per_residue_rmsd(
+                        moving_structure, per_residue_rmsd, overall_rmsd = calculate_per_residue_rmsd(
                             fixed_structure, moving_structure, overhang_size
                         )
-                        best_point = np.argmin(per_residue_rmsd)
-                        print('Real Overhang:', len(per_residue_rmsd))
-                        print('Best point:',  best_point)
-                        per_chain_rmsd = pd.DataFrame(per_chain_rmsd)
-                        interface_rmsd = per_chain_rmsd.iloc[:, [np.argmin(per_residue_rmsd)]]
+                        magnitudes = np.linalg.norm(per_residue_rmsd, axis=1)
+                        best_point = np.argmin(magnitudes)
+                        #print('Best point for merging:',  best_point)
                         
-                        if np.mean(interface_rmsd) < rmsd:
+                        if magnitudes[best_point] < rmsd:
                             pair = [j + i]
-                            rmsd = np.mean(interface_rmsd)
+                            rmsd = magnitudes[best_point]
                     else:
                         result_superimposer = local_superimpose(fixed_structure, moving_structure, overhang_size)
                         print('Running local superimposition. RMSD not available in this mode')
@@ -172,17 +178,20 @@ def superimpose_and_merge(pdb_files, overhang_size, superposition, name, overhan
 
                 # Rename chain in moving_structure if needed
                 moving_structure = rename_chain_if_exists(moving_structure)
-
-                moving_structure, per_residue_rmsd, overall_rmsd, per_chain_rmsd = calculate_per_residue_rmsd(
+                moving_structure = remove_oxt_atom(moving_structure)
+                moving_structure = remove_all_hydrogens(moving_structure)
+                
+                moving_structure, per_residue_rmsd, overall_rmsd= calculate_per_residue_rmsd(
                     fixed_structure, moving_structure, overhang_size
                 )
-                best_point = np.argmin(per_residue_rmsd)
-                print('Best point:', len(per_residue_rmsd), best_point)
-                per_chain_rmsd = pd.DataFrame(per_chain_rmsd)
-                interface_rmsd = per_chain_rmsd.iloc[:, [np.argmin(per_residue_rmsd)]]
-
-                deleted_overhang = delete_overhang(fixed_structure, moving_structure, overhang_size, np.argmin(per_residue_rmsd))
+                magnitudes = np.linalg.norm(per_residue_rmsd, axis=1)
+                best_point = np.argmin(magnitudes)
                 
+                #per_chain_rmsd = pd.DataFrame(per_chain_rmsd)
+                interface_rmsd = per_residue_rmsd[best_point]
+                deleted_overhang = delete_overhang(fixed_structure, moving_structure, overhang_size, best_point)
+
+                    
                 if chain_mode == 0:
                     moving_structure, chain_pairs = rename_chains_spherical(fixed_structure, moving_structure, interface_rmsd, change_bfactor)
                 elif chain_mode == 1:

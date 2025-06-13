@@ -3,7 +3,7 @@ import pandas as pd
 import random
 from scipy.cluster.hierarchy import linkage, fcluster
 from scipy.spatial.distance import pdist
-import scipy.cluster.hierarchy as such
+import scipy.cluster.hierarchy as sch
 
 def find_last_atom_position(fixed_structure, moving_structure):
     """
