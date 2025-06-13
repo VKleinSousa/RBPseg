@@ -1,6 +1,7 @@
 # RBPseg: A Tool for Tail Fiber Structure Prediction
 
 ## Table of Contents
+- [About](#about)
 - [Installation](#installation)
   - [Requirements](#requirements)
 - [Usage](#usage)
@@ -16,6 +17,8 @@
 
 - [Version](#version)
 
+
+## About
 
 **RBPseg** is a pipeline designed to predict and analyze phage tail fiber proteins. It has three major modules. First, it uses structural information (ESMfold/ColabFold/Alphafold) monomeric prediction to find pseudo-domains in the fiber and fractionate its sequence to '.FASTA' files (using the sDp approach) that can be further predicted using AlphaFold-multimer as trimers. The fraction modules can be merged together into a full fiber structure. RBPseg also has a built structural clustering metric (SM/pSM) that estimate the optimal number of clusters giving a TM-score matrix. 
 
