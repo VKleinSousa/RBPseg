@@ -74,8 +74,34 @@ outputs: FASTA files; overlaps file; sDp plot:
 
 To run the merge process:
 
+##### Prepare Files for merging
+You need to prepare your files before running the merge module. You can do it by hand (follow the /Examples/Example2-Merge file structure):
+
+```
+rbpA_seq_0_ranked_0.pdb
+rbpA_seq_0_ranked_1.pdb
+...
+rbpA_seq_4_ranked_5.pdb
+```
+
+or you can run the prepare function:
+
+```
+usage: rbpseg-prepare [-h] -i INPUT -o OUTPUT [-af3]
+
+Prepare PDB files for merging.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -i INPUT, --input INPUT
+                        Path to the input directory containing alphafold prediction folders. 
+  -o OUTPUT, --output OUTPUT
+                        Path to the output directory where the prepared files will be saved.
+  -af3, --af3           Add flag if files are coming from af3.
+```
+
 ```bash
-rbpseg-merge -d Examples/Example2-Merge -of Examples/Example2-Merge/overlaps.csv -n rbp_11.pdb
+rbpseg-merge -d Examples/Example2-Merge -of Examples/Example2-Merge/overlaps.csv -c 1
 ```
 outputs: merged file (rbp_11.pdb). 
 
@@ -90,7 +116,7 @@ rbpseg-sdp -p Examples/Example3-PseudoDomain/rbp_11.pdb -k 20 -sv
 ![sdpspectral](./Examples/Example3-PseudoDomain/rbp_11_combined_plots_spectral.png)
 
 
-#### Example 3: Classifying your own RBP into TC or D-Classes
+#### Example 4: Classifying your own RBP into TC or D-Classes
 
 ```bash
 rbpseg-classify -p input_protein.pdb -o output_dir -db 0
