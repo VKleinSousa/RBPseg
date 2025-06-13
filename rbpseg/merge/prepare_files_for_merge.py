@@ -40,10 +40,10 @@ def prepare_files_af3(input_path, output_path):
             print(f"Skipping non-directory: {directory_path}")
 
 def main():
-    parser = argparse.ArgumentParser(description='Prepare PDB files for TFold merging.')
-    parser.add_argument('-i', '--input', required=True, help='Path to the input directory containing PDB folders.')
+    parser = argparse.ArgumentParser(description='Prepare PDB files for merging.')
+    parser.add_argument('-i', '--input', required=True, help=' Path to the input directory containing alphafold prediction folders.')
     parser.add_argument('-o', '--output', required=True, help='Path to the output directory where the prepared files will be saved.')
-    parser.add_argument("-af3", "--af3", action='store_true', help='Add flag to save json files for AF3. Default with 5 seeds.')
+    parser.add_argument("-af3", "--af3", action='store_true', help='Add flag if files are coming from af3.')
     args = parser.parse_args()
     if args.af3:
         prepare_files_af3(args.input, args.output)
