@@ -101,11 +101,11 @@ def main():
 
     # Add command-line flags for directory_path, overhang_size, and superimpose_function
     parser.add_argument('-d', '--directory', required=True, help='Path to the directory containing PDB files')
-    parser.add_argument('-o', '--overhang', type=int, default=50, help='Overhang size (default: 50)')
+    #parser.add_argument('-o', '--overhang', type=int, default=50, help='Overhang size (default: 50)')
     parser.add_argument('-of', '--overhang_file', type=str, help='Overhangs file')
-    parser.add_argument('-f', '--function', type=int, default=0, help='Superimpose function: 0 to global, 1 to local (default: 1)')
+    parser.add_argument('-f', '--function', type=int, default=0, help='Superimpose function: 0 to global, 1 to local (default: 0) - local is currently deactivated.')
     parser.add_argument('-n', '--save_name', type=str, default='merged.pdb', help='Name of the final file (default: merged.pdb)')
-    parser.add_argument('-c', '--chain_mode', type=int, default=0, help='Chain pairing mode. 0: Spherical restriction and minimal RMSD; 1: hierarchy (Nearest Point Algorithm)')
+    parser.add_argument('-c', '--chain_mode', type=int, default=1, help='Chain pairing mode. 0: Spherical restriction and minimal RMSD; 1: hierarchy (Nearest Point Algorithm)')
     parser.add_argument('-r', '--relax',  action='store_true', help='Add -r to run amber relaxation. ')
     parser.add_argument('-b', '--bfactor', action='store_true', help='Add -b to change the bfactor to zero in segment points')
 
@@ -114,7 +114,7 @@ def main():
 
     # Retrieve values from the parsed arguments
     directory_path = args.directory
-    overhang_size = args.overhang
+    overhang_size = 50# args.overhang
     superimpose_function = args.function
     change_bfactor = args.bfactor
     name = os.path.join(directory_path, args.save_name)
