@@ -156,6 +156,8 @@ rbpseg-classify -p input_protein.pdb -o output_dir -db 0
 
 ```
 
+You can the [Google Colab notebook](https://colab.research.google.com/drive/147gkEkDNK-xJoM_0mX88pofQzJD7kREH?usp=sharing) to run the structural based classification. 
+
 ## Reference ##
 
 If you applied any of these codes in your work, please consider citing:
