@@ -56,7 +56,7 @@ def save_structure(structure, filename, selector=None):
         logger.error(f"Error saving structure to {filename}: {e}", exc_info=True)
         raise
 
-def save_results(structure, clusters, residues, save_overlap_domains, save_pdb_domains, pdb_file, symmetry, min_cluster_size, min_ov_size):
+def save_results(structure, clusters, residues, save_overlap_domains, save_pdb_domains, pdb_file, symmetry, min_cluster_size, min_ov_size, len_chain=1):
     cluster_residues = [[] for _ in range(len(np.unique(clusters)))]
     for i, cluster in enumerate(clusters):
         cluster_residues[cluster].append(residues[i])
@@ -122,7 +122,7 @@ def save_results(structure, clusters, residues, save_overlap_domains, save_pdb_d
         save_overlap_domains_to_fasta(cluster_residues, sorted_cluster_indices, pdb_file, symmetry, min_cluster_size, min_ov_size)
 
     if save_pdb_domains:
-        save_pdb_clusters(structure, cluster_residues, pdb_file)
+        save_pdb_clusters(structure, cluster_residues, pdb_file, len_chain)
 
 
 def save_overlap_domains_to_fasta(cluster_residues, sorted_cluster_indices, pdb_file, symmetry, min_cluster_size,min_ov_size):
@@ -161,11 +161,11 @@ def save_overlap_domains_to_fasta(cluster_residues, sorted_cluster_indices, pdb_
     df_overhang = pd.DataFrame({'Concatenated Domains': pairs, 'Overhang Length': overlap_lengths})
     df_overhang.to_csv(f'{pdb_file.split(".")[0]}_overhangs.csv', index=False)
 
-def save_pdb_clusters(structure, cluster_residues, pdb_file):
+def save_pdb_clusters(structure, cluster_residues, pdb_file, len_chain):
     # Get all chains in the structure
     chains = [chain for chain in structure.get_chains()]
     
-    if len(chains) < 3:
+    if len(chains) < len_chain:
         print("Warning: Expected three chains in the structure.")
         return
     
