@@ -90,7 +90,7 @@ outputs: FASTA files; overlaps file; sDp plot:
 ![sdpExample1](./Examples/Example1-sDp/rbp_11_combined_plots.png)
 
 
-You can also use the ![Google Colab Notebook](https://colab.research.google.com/drive/13eMRcdUuJXUrYFwZieGEhloGi3ygooF_?usp=sharing) to run the sdp module. 
+You can also use the [Google Colab Notebook](https://colab.research.google.com/drive/13eMRcdUuJXUrYFwZieGEhloGi3ygooF_?usp=sharing) to run the sdp module. 
 
 #### Example 2: Merging fractions
 
@@ -123,7 +123,7 @@ optional arguments:
 ```
 
 
-You can also use the ![Google Colab Notebook](https://colab.research.google.com/drive/1cT_OsP8KHZH157nmGkA4HQ6RfX0EWbsj?usp=sharing) to run the merging module. 
+You can also use the [Google Colab Notebook](https://colab.research.google.com/drive/1cT_OsP8KHZH157nmGkA4HQ6RfX0EWbsj?usp=sharing) to run the merging module. 
 
 ```bash
 rbpseg-merge -d Examples/Example2-Merge -of Examples/Example2-Merge/overlaps.csv -c 1
