@@ -30,7 +30,7 @@ setup(
             'rbpseg-validate=rbpseg.validate.validate_main:main'
         ],
     },
-    python_requires='==3.9.21',  # Define Python version compatibility
+    python_requires='>=3.9.21',  # Define Python version compatibility
     author='Victor Klein-Sousa',
     description='A package for tail fiber structure analysis.',
     long_description=open('README.md').read(),  # Make sure this file exists in the root directory
