@@ -52,7 +52,7 @@ def get_structure_name(pdb_file):
 def superimpose_and_merge(pdb_files,sequence_counts, overhang_size, superposition, name, overhang_list, change_bfactor, chain_mode=0):
     parser = PDBParser(QUIET=True)
 
-    
+    print('sequence counts:',sequence_counts)
     if len(pdb_files) > sequence_counts[0]:
         fixed_structure = None
         moving_structure = None
