@@ -120,6 +120,9 @@ optional arguments:
   -af3, --af3           Add flag if files are coming from af3.
 ```
 
+
+You can also use the ![Google Colab Notebook](https://colab.research.google.com/drive/1cT_OsP8KHZH157nmGkA4HQ6RfX0EWbsj?usp=sharing) to run the merging module. 
+
 ```bash
 rbpseg-merge -d Examples/Example2-Merge -of Examples/Example2-Merge/overlaps.csv -c 1
 ```
