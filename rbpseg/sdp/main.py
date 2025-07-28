@@ -15,7 +15,7 @@ def main():
     formatter_class=argparse.RawDescriptionHelpFormatter,
     description=textwrap.dedent('''\
             ___________________________________________
-                        RBPseg-sdp v0.1.3
+                        RBPseg-sdp v1.1.1
             ___________________________________________
             Segment PDB files based on the sDp analysis. 
             '''), 
@@ -26,7 +26,7 @@ def main():
             
             If you used this script, please consider citing us:
 
-            Towards a complete phage tail fiber structure atlas. Victor Klein-Sousa, Aritz Roa-Eguiara, Claudia Sybille Kielkopf, Nicholas Sofos, Nicholas M. I. Taylor bioRxiv 2024.10.28.620165; doi: https://doi.org/10.1101/2024.10.28.620165
+            Klein-Sousa, Victor, et al. "RBPseg: Toward a complete phage tail fiber structure atlas." Science Advances 11.23 (2025): eadv0870.
             ______________________________
             
             Please don't hesitate to contact us if you have any problems.
@@ -64,7 +64,8 @@ def main():
     parser.add_argument("-u", "--optimize_umap", action='store_true', help=f'Add flag to self-optimize UMAP parameters.')
     parser.add_argument("-o", "--only_single_chain", action='store_true', help=f'Add flag if the model has a single chain.')
     parser.add_argument("-np", "--normalize_plddt", action='store_true', help=f'Add flag to normalize pLDDT.')
-
+    parser.add_argument("-jaf3", "--json_af3", action='store_true', help=f'Add flag to save json files for AF3. Default with 2 seeds.')
+    
     args = parser.parse_args()
 
     logger.info("Starting main process")
@@ -75,7 +76,7 @@ def main():
         clusters, umap_result = perform_clustering(sdp_matrix, args.clustering_method, args.min_k, args.max_k, args.min_domain_size, args.optimize_umap)
         
         structure_full = load_structure(args.pdb, args.only_single_chain)
-        save_results(structure_full, clusters, residues, args.save_overlap_domains, args.save_pdb_domains, args.pdb, args.number_of_chains, args.min_domain_size, args.min_ov_size)
+        save_results(structure_full, clusters, residues, args.save_overlap_domains, args.save_pdb_domains, args.pdb, args.number_of_chains, args.min_domain_size, args.min_ov_size,args.json_af3)
         visualize_results(sdp_matrix, umap_result, clusters, args.pdb)
         logger.info("Main process completed successfully")
     except Exception as e:
