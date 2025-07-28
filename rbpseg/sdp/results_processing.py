@@ -165,9 +165,9 @@ def save_pdb_clusters(structure, cluster_residues, pdb_file, len_chain):
     # Get all chains in the structure
     chains = [chain for chain in structure.get_chains()]
     
-    if len(chains) < len_chain:
-        print("Warning: Expected three chains in the structure.")
-        return
+    #if len(chains) < len_chain:
+     #   print("Warning: Expected three chains in the structure.")
+      #  return
     
     first_chain = chains[0]
     second_chain = chains[1]
