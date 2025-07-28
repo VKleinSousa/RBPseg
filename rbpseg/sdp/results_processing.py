@@ -2,6 +2,7 @@ from Bio.PDB import PDBIO, Select
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from Bio import SeqIO
+from .create_json_af3 import create_json
 import csv
 import matplotlib.pyplot as plt
 import logging
@@ -56,7 +57,7 @@ def save_structure(structure, filename, selector=None):
         logger.error(f"Error saving structure to {filename}: {e}", exc_info=True)
         raise
 
-def save_results(structure, clusters, residues, save_overlap_domains, save_pdb_domains, pdb_file, symmetry, min_cluster_size, min_ov_size):
+def save_results(structure, clusters, residues, save_overlap_domains, save_pdb_domains, pdb_file, symmetry, min_cluster_size, min_ov_size,json_af3):
     cluster_residues = [[] for _ in range(len(np.unique(clusters)))]
     for i, cluster in enumerate(clusters):
         cluster_residues[cluster].append(residues[i])
@@ -119,13 +120,13 @@ def save_results(structure, clusters, residues, save_overlap_domains, save_pdb_d
 
 
     if save_overlap_domains:
-        save_overlap_domains_to_fasta(cluster_residues, sorted_cluster_indices, pdb_file, symmetry, min_cluster_size, min_ov_size)
+        save_overlap_domains_to_fasta(cluster_residues, sorted_cluster_indices, pdb_file, symmetry, min_cluster_size, min_ov_size,json_af3)
 
     if save_pdb_domains:
         save_pdb_clusters(structure, cluster_residues, pdb_file)
 
 
-def save_overlap_domains_to_fasta(cluster_residues, sorted_cluster_indices, pdb_file, symmetry, min_cluster_size,min_ov_size):
+def save_overlap_domains_to_fasta(cluster_residues, sorted_cluster_indices, pdb_file, symmetry, min_cluster_size,min_ov_size,json_af3,num_seeds=1):
 
     overlap_lengths, pairs, k, concatenated_sequence, domains_combined, overlap_length, temp_count = [], [], 0, '', '', 0, 0
     
@@ -150,6 +151,8 @@ def save_overlap_domains_to_fasta(cluster_residues, sorted_cluster_indices, pdb_
             domains_combined = ''
             fasta_filename = f'{pdb_file.split(".")[0]}_seq_{k}.fasta'
             SeqIO.write(seq_records, fasta_filename, "fasta")
+            if json_af3:
+                create_json(fasta_filename, fasta_filename+'.json', num_seeds=num_seeds)
             concatenated_sequence, overlap_length, temp_count = '', 0, 0
             k += 1
     
@@ -157,6 +160,8 @@ def save_overlap_domains_to_fasta(cluster_residues, sorted_cluster_indices, pdb_
             concatenated_sequence = concatenated_sequence + current_cluster_sequence
             domains_combined = domains_combined + f'{sorted_cluster_indices[i] + 1}-'
             temp_count = 1
+    
+        
         
     df_overhang = pd.DataFrame({'Concatenated Domains': pairs, 'Overhang Length': overlap_lengths})
     df_overhang.to_csv(f'{pdb_file.split(".")[0]}_overhangs.csv', index=False)
