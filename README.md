@@ -90,6 +90,8 @@ outputs: FASTA files; overlaps file; sDp plot:
 ![sdpExample1](./Examples/Example1-sDp/rbp_11_combined_plots.png)
 
 
+You can also use the ![Google Colab Notebook](https://colab.research.google.com/drive/13eMRcdUuJXUrYFwZieGEhloGi3ygooF_?usp=sharing) to run the sdp module. 
+
 #### Example 2: Merging fractions
 
 To run the merge process:
