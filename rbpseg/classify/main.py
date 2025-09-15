@@ -157,17 +157,26 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description=textwrap.dedent('''\
             ___________________________________________
-                        RBPseg-classify v0.2.0
+                        RBPseg-classify v1.1.1
             ___________________________________________
             Use this module to classify your input tail fiber model into one of the TC classes or D-classes.
             '''),
         epilog=textwrap.dedent('''\
             _______________________________
-            Developed by Victor Klein-Sousa.
-
+             Developed by Victor Klein-Sousa.
+            
             If you used this script, please consider citing us:
-            Towards a complete phage tail fiber structure atlas. 
+
+            Klein-Sousa, Victor, et al. "RBPseg: Toward a complete phage tail fiber structure atlas." Science Advances 11.23 (2025): eadv0870.
+
+            This module uses Foldseek-multimer; therefore, please consider citing the original paper: 
+
+            Kim, Woosub, et al. "Rapid and sensitive protein complex alignment with Foldseek-Multimer." Nature Methods 22.3 (2025): 469-472.
+            
             ______________________________
+            
+            Please don't hesitate to contact us if you have any problems.
+
             ''')
     )
 
