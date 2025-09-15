@@ -190,28 +190,24 @@ If your goal is to assemble the fiber structure, HDBSCAN is the preferred option
 ### **I have my AlphaFold predictions of my fractions. How do I prepare my files to run the merging module?**
 RBPseg-merge works best when your AlphaFold models are organized into a specific directory structure. The directory should look like this:
 
-- * I have my AF predictions of my fractions, how do I prepare my files to run the merging module?*
-    RBPseg-merge often works better if you have an specific directiory with all your AF models in this manner:
+- * I have my AF predictions of my fractions. How do I prepare my files to run the merging module?*
+    RBPseg-merge often works better if you have a specific directory with all your AF models in this manner:
     ```
 	AFmodels/
 	    {fraction_number}_fibername_{model_number}
 	Example:
-	    0_coolfiber_0.pdb
-	    0_coolfiber_1.pdb
+	    seq_0_coolfiber_0.pdb
+	    seq_0_coolfiber_1.pdb
 	    ...
-	    1_coolfiber_0.pdb
+	    seq_1_coolfiber_0.pdb
 	    ...
-	    5_coolfiber_5.pdb
+	    seq_5_coolfiber_5.pdb
 
     ```
 If your AlphaFold results are in a single folder, you can use the following script to automatically prepare your files:
 
 ``` rbpseg/merge/prepare_files_for_merge.py``` 
 
----
-
-### **How many models per fraction should I have?**
-Currently, **RBPseg works best with 5 models per fraction.** We are working to generalize this in future updates.
 
 ---
 
@@ -225,7 +221,7 @@ For additional inquiries, please don't hesitate to contact us. We’re happy to 
 ## Superposition and Chain Pairing
 
 ### **Superposition**
-In some cases—most often with beta-sandwich domains or helix-coil-helix domains—the consecutive domain may be superimposed with the wrong directionality, leading to a misaligned and incorrect assembly.
+In some cases—most often with beta-sandwich domains or helix-coil-helix domains—the consecutive domain may be superimposed with the wrong directionality, leading to a misaligned and incorrect assembly. Run the validation module to verify the quality of your merging.
 
 #### **Recommendations to resolve this issue:**
 - **Adjust the segmentation parameters:**  
@@ -250,6 +246,19 @@ RBPseg provides two methods to find the optimal pairing, both of which aim to mi
 #### **How to avoid this issue:**
 - **Reduce the number of fractions:**  
    Creating fewer fractions can simplify the pairing process and reduce errors.
+  
+### **sDp fractions FASTA have gaps or sequences do not match**
+
+This issue typically occurs when the input structure contains multiple chains. Predictions involving multiple chains (e.g., trimeric models) are often less accurate and can break local symmetry. This may cause rbpseg-sdp to fragment domains inappropriately.
+
+Current limitation:
+
+In the current version, these broken segments can cause downstream issues during merging.
+
+Quick fix:
+
+Use the --only_single_chain (-o) flag when running rbpseg-sdp.
+This forces the segmentation algorithm to process only a single chain, improving consistency across predictions.
 
 ## **Version**
 
