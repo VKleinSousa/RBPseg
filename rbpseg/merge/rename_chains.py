@@ -1,9 +1,6 @@
 import numpy as np
 import pandas as pd
 import random
-from scipy.cluster.hierarchy import linkage, fcluster
-from scipy.spatial.distance import pdist
-import scipy.cluster.hierarchy as sch
 
 def find_last_atom_position(fixed_structure, moving_structure):
     """
@@ -74,6 +71,9 @@ def check_line_sphere_intersection(vertex, fourth_point, sphere):
 
     return distance_to_center < sphere['radius'], line_length
 
+from scipy.cluster.hierarchy import linkage, fcluster
+from scipy.spatial.distance import pdist
+import scipy.cluster.hierarchy as sch
 
 def nearest_point(all_centroids):
     distance_matrix = pdist(all_centroids)
@@ -171,7 +171,114 @@ def rename_chains_hh(fixed_structure, moving_structure, interface_rmsd, change_b
     
     return moving_structure, chain_pairs
 
-def rename_chains_spherical(fixed_structure, moving_structure, interface_rmsd, change_bfactor):
+def rename_chains_spherical(fixed_structure, moving_structure, change_bfactor):
+    """
+    Rename chains in the moving structure based on geometric proximity and sphere intersection heuristics.
+    """
+
+    pairs = [('E', 'B'), ('F', 'B'), ('G', 'B'),
+             ('E', 'C'), ('F', 'C'), ('G', 'C'),
+             ('E', 'D'), ('F', 'D'), ('G', 'D')]
+    index = [(0, 0), (1, 0), (2, 0),
+             (0, 1), (1, 1), (2, 1),
+             (0, 2), (1, 2), (2, 2)]
+
+    # Step 1: Get centroids of chains
+    def get_chain_centroids(structure, use_last_residue):
+        centroids = []
+        for model in structure:
+            for chain in model:
+                residues = list(chain.get_residues())
+                target_residue = residues[-1] if use_last_residue else residues[0]
+                atoms = list(target_residue.get_atoms())
+                if change_bfactor:
+                    for atom in atoms:
+                        atom.set_bfactor(-1)
+                centroid = sum(atom.get_coord() for atom in atoms) / len(atoms)
+                centroids.append(centroid)
+        return centroids
+
+    chains_fixed_positions = get_chain_centroids(fixed_structure, use_last_residue=True)
+    chains_moving_positions = get_chain_centroids(moving_structure, use_last_residue=False)
+
+    vertices = np.array(chains_fixed_positions)
+    vertices_up = np.array(chains_moving_positions)
+    print(vertices, vertices_up)
+
+    # Step 2: Define sphere based on moving structure triangle
+    triangle_center = find_triangle_center(vertices_up)
+    triangle_height = calculate_triangle_height(vertices_up)
+    sphere_radius = triangle_height / 3.0
+    sphere = create_sphere(triangle_center, sphere_radius)
+
+    # Step 3: Compute sphere intersections and distances
+    connection_length_list = []
+    intersection_list = []
+
+    for i, j in index:
+        moving_point = vertices_up[i]
+        fixed_point = vertices[j]
+        intersection, connection_length = check_line_sphere_intersection(moving_point, fixed_point, sphere)
+        connection_length_list.append(connection_length)
+        intersection_list.append(intersection)
+
+    df = pd.DataFrame({
+        'pair': pairs,
+        'index': index,
+        'connection_length': connection_length_list,
+        'intersection': intersection_list
+    }).sort_values('connection_length')
+
+    # Step 4: Select best non-intersecting chain pairs
+    chain_pairs = []
+    excluded = set()
+    attempts = 0
+    max_pairs = 2  # choose 2 pairs, third is filled later if needed
+
+    while attempts < max_pairs:
+        filtered_df = df[
+            (df['intersection'] == False) &
+            (df['pair'].apply(lambda x: len(set(x)) == len(x)))
+        ]      
+
+        filtered_df = filtered_df[~filtered_df['pair'].apply(lambda x: any(res in excluded for res in x))]
+        if filtered_df.empty:
+            # Fallback to random choice if nothing valid found
+            available = [p for p in pairs if not any(res in excluded for res in p)]
+            if not available:
+                break
+            choice = random.choice(available)
+        else:
+            choice = filtered_df.iloc[0]['pair']
+
+        chain_pairs.append(choice)
+        excluded.update(choice)
+        attempts += 1
+
+    # Step 5: Ensure we always have 3 pairs
+    if len(chain_pairs) < 3:
+        all_residues = {res for pair in pairs for res in pair}
+        used_residues = {res for pair in chain_pairs for res in pair}
+        missing = sorted(all_residues - used_residues, key=str.lower, reverse=True)
+        chain_pairs.append((missing[0], missing[1]))
+
+    chain_pairs = sorted(chain_pairs, key=lambda x: x[0])
+    print("Selected chain pairs:", chain_pairs)
+
+    # Step 6: Rename moving chains
+    for model in moving_structure:
+        for i, chain in enumerate(model):
+            if i < len(chain_pairs):
+                chain.id = chain_pairs[i][0]
+
+    # Step 7: Append fixed chains to moving structure
+    for model in fixed_structure:
+        for chain in model:
+            moving_structure[0].add(chain.copy())
+
+    return moving_structure, chain_pairs
+
+def rename_chains_spherical_old(fixed_structure, moving_structure, interface_rmsd, change_bfactor):
     """
     Rename chains in the moving structure based on the best matching pair with the fixed structure.
     """
