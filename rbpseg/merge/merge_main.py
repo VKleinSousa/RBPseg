@@ -96,6 +96,8 @@ def main():
     epilog=textwrap.dedent('''\
             _______________________________
             Developed by Victor Klein-Sousa.
+
+            ## Citations
             
             If you used this script, please consider citing us:
 
@@ -104,6 +106,17 @@ def main():
             This module uses USalign, please consider citing the original paper as well: 
 
             Zhang, Chengxin, et al. "US-align: universal structure alignments of proteins, nucleic acids, and macromolecular complexes." Nature methods 19.9 (2022): 1109-1115.
+
+            If your input fractions were predicted using AF2, remember to cite the original work:
+
+            Jumper, John, et al. "Highly accurate protein structure prediction with AlphaFold." nature 596.7873 (2021): 583-589.
+
+            If your input fraction were predicted using AF3, remember to cite the original work:
+
+            Abramson, Josh, et al. "Accurate structure prediction of biomolecular interactions with AlphaFold 3." Nature 630.8016 (2024): 493-500.
+
+            Please remember to follow AF3's terms of use. 
+
             ______________________________
             
             Please don't hesitate to contact us if you have any problems.
