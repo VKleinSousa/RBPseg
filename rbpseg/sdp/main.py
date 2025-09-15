@@ -51,7 +51,7 @@ def main():
 
     # Define arguments
     parser.add_argument("-p", "--pdb", required=True, help="PDB file")
-    parser.add_argument("-c", "--clustering_method", type=str, default=_defaults['clustering_method'], help=f'Clustering Method. Options: kmeans, hdbscan. Default: {_defaults["clustering_method"]}')
+    parser.add_argument("-c", "--clustering_method", type=str, default=_defaults['clustering_method'], help=f'Clustering Method. Options: spectral, kmeans, hdbscan. Default: {_defaults["clustering_method"]}')
     parser.add_argument("-k", "--max_k", type=int, default=_defaults['max_k'], help=f'Maximum number of possible kmean clusters. Used only -c is spectral or kmeans. Optimal value will depend on the size of the fiber. Default: {_defaults["max_k"]}')
     parser.add_argument("-mk", "--min_k", type=int, default=_defaults['min_k'], help=f'Minimum number of possible kmean clusters. Default: {_defaults["min_k"]}')
     parser.add_argument("-s", "--min_domain_size", type=int, default=_defaults['min_domain_size'], help=f'Minimal possible domain size. Default: {_defaults["min_domain_size"]}')
@@ -62,7 +62,7 @@ def main():
     parser.add_argument("-so", "--save_overlap_domains", action='store_true', help=f'Add flag to include overlap domains per fasta file.')
     parser.add_argument("-sv", "--save_pdb_domains", action='store_true', help=f'Add flag to save the pdb file of the domains.')
     parser.add_argument("-u", "--optimize_umap", action='store_true', help=f'Add flag to self-optimize UMAP parameters.')
-    parser.add_argument("-o", "--only_single_chain", action='store_true', help=f'Add flag if the model has a single chain.')
+    parser.add_argument("-o", "--only_single_chain", action='store_true', help=f'Add flag if the model has multiple chains. This is essential for the RBPseg pipeline, but not necessary if the goal is finding domains of the multimeric state. This flag will only run the sDp with the first chain of your model.')
     parser.add_argument("-np", "--normalize_plddt", action='store_true', help=f'Add flag to normalize pLDDT.')
     parser.add_argument("-jaf3", "--json_af3", action='store_true', help=f'Add flag to save json files for AF3. Default with 2 seeds.')
     
