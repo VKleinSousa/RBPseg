@@ -78,7 +78,7 @@ def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter,
     description=textwrap.dedent('''\
             ___________________________________________
-                        RBPseg-merge v1.1.1
+                        RBPseg-merge v1.1.3
             ___________________________________________
             The RBPseg-merge module performs superimposition and merging of fractions.
             
