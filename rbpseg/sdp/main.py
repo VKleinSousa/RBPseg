@@ -15,7 +15,7 @@ def main():
     formatter_class=argparse.RawDescriptionHelpFormatter,
     description=textwrap.dedent('''\
             ___________________________________________
-                        RBPseg-sdp v1.1.1
+                        RBPseg-sdp v1.1.3
             ___________________________________________
             Segment PDB files based on the sDp analysis. 
             '''), 
