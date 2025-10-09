@@ -1,21 +1,33 @@
 import numpy as np
-from Bio.PDB import PDBParser, PDBIO
+from Bio.PDB import PDBParser, MMCIFParser
+import os
 import logging
 
 logger = logging.getLogger(__name__)
 
 def load_structure(pdb_file, only_one_chain):
     logger.info(f"Loading structure from {pdb_file}")
-    parser = PDBParser(QUIET=True)
-    structure = parser.get_structure('structure', pdb_file)
+    
+    ext = os.path.splitext(pdb_file)[1].lower()
+    
+    if ext == ".pdb":
+        parser = PDBParser(QUIET=True)
+    elif ext == ".cif":
+        parser = MMCIFParser(QUIET=True)
+    else:
+        logger.error(f"Unsupported file format: {ext}")
+        return None
+
+    try:
+        structure = parser.get_structure('structure', pdb_file)
+    except Exception as e:
+        logger.error(f"Failed to parse structure file {pdb_file}: {e}")
+        return None
 
     if only_one_chain:
-        # Extract chains and sort them alphabetically by their chain IDs
         chains = sorted(structure[0].get_chains(), key=lambda chain: chain.id)
-        
-        # Select the first chain in alphabetical order
         chain_id = chains[0].id if chains else None
-        
+
         if chain_id:
             structure = extract_chain(structure, chain_id)
         else:
@@ -23,6 +35,7 @@ def load_structure(pdb_file, only_one_chain):
             return None
 
     return structure
+
 def preprocess_structure(structure, experimental_structure, normalize_plddt):
     if experimental_structure:
         structure = make_bfactor(structure)
