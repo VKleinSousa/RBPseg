@@ -51,7 +51,7 @@ def run_foldseek(query_path, database_path, output_path, tmp_dir):
     try:
         # Construct the FoldSeek command
         command = [
-            "foldseek", "easy-search",
+            "foldseek", "easy-multimersearch",
             query_path,
             database_path,
             output_path,
