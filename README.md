@@ -211,7 +211,7 @@ If your AlphaFold results are in a single folder, you can use the following scri
 
 ---
 
-### **I have my own domain segments, I have not used the rbpseg-sdp pipeline, can I still merge than together? **
+### **I have my own domain segments, I have not used the rbpseg-sdp pipeline, can I still merge than together?**
 
 *YES* you can use the standalone script just_merge.py 
 
