@@ -211,6 +211,16 @@ If your AlphaFold results are in a single folder, you can use the following scri
 
 ---
 
+### **I have my own domain segments, I have not used the rbpseg-sdp pipeline, can I still merge than together? **
+
+*YES* you can use the standalone script just_merge.py 
+
+```
+python just_merge.py --pdb in.pdb --out out.pdb --pairs "A,D;B,E;C,F" 
+```
+
+Make sure both segments are saved in the same .pdb file and were previously aligned. 
+
 ### **Have more questions?**
 For additional inquiries, please don't hesitate to contact us. We’re happy to help!
 
